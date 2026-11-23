@@ -1,0 +1,36 @@
+name: Build Windows portable app
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - 'DofusFarmAssistant/**'
+      - '.github/workflows/build-windows.yml'
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Récupérer le code source
+        uses: actions/checkout@v4
+      - name: Installer le SDK .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restaurer et publier en EXE autonome
+        run: dotnet publish DofusFarmAssistant/DofusFarmAssistant.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false --output artifacts/portable
+      - name: Vérifier et préparer l’archive
+        shell: pwsh
+        run: |
+          $exe = Join-Path $PWD 'artifacts/portable/DofusFarmAssistant.exe'
+          if (!(Test-Path -LiteralPath $exe)) { throw 'DofusFarmAssistant.exe absent après publication.' }
+          Copy-Item README.md artifacts/portable/Guide-francais.md
+          Compress-Archive -Path artifacts/portable/* -DestinationPath artifacts/DofusFarmAssistant_Windows.zip -Force
+          if (!(Test-Path -LiteralPath 'artifacts/DofusFarmAssistant_Windows.zip')) { throw 'Archive ZIP absente.' }
+          Get-ChildItem artifacts -Recurse | Select-Object FullName,Length
+      - name: Publier les fichiers téléchargeables
+        uses: actions/upload-artifact@v4
+        with:
+          name: DofusFarmAssistant-Windows-x64
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 30

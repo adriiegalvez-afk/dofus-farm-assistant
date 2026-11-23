@@ -35,6 +35,11 @@ public sealed class MainForm : Form
     }
     private void BuildUi()
     {
+        poll.Minimum=1; poll.Maximum=60;
+        shotEvery.Minimum=0; shotEvery.Maximum=1440;
+        keepDays.Minimum=1; keepDays.Maximum=3650;
+        storage.Minimum=50; storage.Maximum=100000;
+        smtpPort.Minimum=1; smtpPort.Maximum=65535;
         var root = new TableLayoutPanel { Dock=DockStyle.Fill, ColumnCount=1, RowCount=2, Padding=new Padding(18), BackColor=BackColor }; root.RowStyles.Add(new RowStyle(SizeType.Absolute, 65)); root.RowStyles.Add(new RowStyle(SizeType.Percent,100)); Controls.Add(root);
         var title = new Label { Text="DOFUS FARM ASSISTANT", Dock=DockStyle.Fill, Font=new Font("Segoe UI Semibold",21,FontStyle.Bold), ForeColor=Color.White, TextAlign=ContentAlignment.MiddleLeft }; root.Controls.Add(title,0,0);
         var tabs = new TabControl { Dock=DockStyle.Fill }; root.Controls.Add(tabs,0,1);
